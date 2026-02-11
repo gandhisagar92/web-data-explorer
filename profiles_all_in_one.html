@@ -171,16 +171,15 @@
         }
         
         .shortlist-badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            z-index: 10;
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 2em;
+            font-size: 1.5em;
             transition: all 0.3s ease;
             filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+            margin-left: 10px;
+            vertical-align: middle;
+            padding: 0;
         }
         
         .shortlist-badge:hover {
@@ -15006,12 +15005,6 @@
                 
                 return `
                 <div class="profile-card">
-                    <button class="shortlist-badge" 
-                            data-profile-id="${profile.id}" 
-                            onclick="toggleShortlist('${profile.id}')"
-                            title="Add to shortlist">
-                        ${isInShortlist ? '⭐' : '☆'}
-                    </button>
                     <div class="profile-image-container">
                         <img src="${profile.image}" 
                              alt="${profile.name}" 
@@ -15020,8 +15013,18 @@
                     </div>
                     <div class="profile-content">
                         <div class="profile-header">
-                            <h2 class="profile-name">${profile.name}</h2>
-                            <div class="profile-id">${profile.id}</div>
+                            <div class="profile-header-row">
+                                <h2 class="profile-name">${profile.name}</h2>
+                                <div class="profile-id-container">
+                                    <div class="profile-id">${profile.id}</div>
+                                    <button class="shortlist-badge" 
+                                            data-profile-id="${profile.id}" 
+                                            onclick="toggleShortlist('${profile.id}')"
+                                            title="${isInShortlist ? 'Remove from shortlist' : 'Add to shortlist'}">
+                                        ${isInShortlist ? '⭐' : '☆'}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="profile-details">
