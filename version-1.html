@@ -635,22 +635,25 @@
             
             try {
                 // Store credentials in cookie jar
-                cookieJar.user = encodeURIComponent(email);
-                cookieJar.pass = encodeURIComponent(password);
+                cookieJar.user = email;
+                cookieJar.pass = password;
                 cookieJar.PHPSESSID = Math.random().toString(36).substring(2) + Date.now().toString(36);
                 
                 // Store credentials
                 userCredentials.email = email;
                 userCredentials.password = password;
                 userCredentials.sessionId = cookieJar.PHPSESSID;
+				
+				const sessionId = '5ec9b10a431cd1525a428f385ad24cd9'
+				setCookie('PHPSESSID', sessionId);
                 
                 // Try to authenticate by making a test API call through proxy
-                const testResponse = await proxyFetch('https://www.saptpadi.in/short_list_result', {
+                const testResponse = await proxyFetch('https://www.saptpadi.in/login', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
                     },
-                    body: 'actionfunction=showData&page=1'
+                    body: 'username=gandhisagar12%40gmail.com&password=24%23Tirthankar&member_login=Login'
                 });
                 
                 if (testResponse.ok) {
