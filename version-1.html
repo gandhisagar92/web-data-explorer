@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Directory</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        h1 {
+            color: #f8fafc;
+            font-size: 2.8em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        
+        .shortlist-filter-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(245, 158, 11, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .shortlist-filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+        }
+        
+        .shortlist-filter-btn.active {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        }
+        
+        .shortlist-count {
+            background: white;
+            color: #f59e0b;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .controls-section {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+        }
+        
+        .search-container {
+            margin-bottom: 25px;
+        }
+        
+        .search-container label {
+            display: block;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1em;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #64748b;
+            box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1);
+        }
+        
+        .sort-container {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .sort-container label {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 1.1em;
+        }
+        
+        .sort-button {
+            padding: 12px 25px;
+            font-size: 1em;
+            font-weight: 600;
+            border: 2px solid #64748b;
+            background: white;
+            color: #64748b;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .sort-button:hover {
+            background: #64748b;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(100, 116, 139, 0.3);
+        }
+        
+        .sort-button.active {
+            background: linear-gradient(135deg, #475569 0%, #64748b 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(100, 116, 139, 0.4);
+        }
+        
+        .profiles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 30px;
+        }
+        
+        .profile-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            transition: all 0.4s ease;
+            border: 1px solid rgba(255,255,255,0.8);
+            position: relative;
+        }
+        
+        .profile-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+        }
+        
+        .shortlist-badge {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5em;
+            transition: all 0.3s ease;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+            margin-left: 10px;
+            vertical-align: middle;
+            padding: 0;
+        }
+        
+        .shortlist-badge:hover {
+            transform: scale(1.2) rotate(15deg);
+        }
+        
+        .shortlist-badge.active {
+            animation: starPulse 0.5s ease;
+        }
+        
+        .profile-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .profile-id-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        @keyframes starPulse {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.3) rotate(180deg); }
+        }
+        
+        .profile-image-container {
+            width: 100%;
+            height: 400px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+            position: relative;
+        }
+        
+        .profile-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center top;
+        }
+        
+        .profile-content {
+            padding: 25px;
+        }
+        
+        .profile-header {
+            border-bottom: 3px solid transparent;
+            border-image: linear-gradient(90deg, #64748b, #94a3b8) 1;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .profile-name {
+            font-size: 1.5em;
+            color: #1e293b;
+            margin-bottom: 5px;
+            text-transform: capitalize;
+            font-weight: 700;
+            flex: 1;
+            min-width: 0;
+            word-wrap: break-word;
+        }
+        
+        .profile-id {
+            background: linear-gradient(135deg, #475569 0%, #64748b 100%);
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+            padding: 5px 12px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .profile-details {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .detail-row {
+            display: flex;
+            padding: 8px 0;
+            gap: 10px;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #475569;
+            min-width: 120px;
+            flex-shrink: 0;
+        }
+        
+        .detail-value {
+            color: #1f2937;
+            font-weight: 500;
+        }
+        
+        .profile-description {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
+            color: #475569;
+            line-height: 1.6;
+            font-size: 0.95em;
+            border-left: 4px solid #64748b;
+        }
+        
+        .profile-description a {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .profile-description a:hover {
+            text-decoration: underline;
+        }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .view-photo-btn, .view-contact-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #475569 0%, #64748b 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.05em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(71, 85, 105, 0.3);
+            letter-spacing: 0.5px;
+        }
+        
+        .view-photo-btn:hover, .view-contact-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(71, 85, 105, 0.4);
+            background: linear-gradient(135deg, #334155 0%, #475569 100%);
+        }
+        
+        .view-contact-btn {
+            background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+            box-shadow: 0 5px 15px rgba(8, 145, 178, 0.3);
+        }
+        
+        .view-contact-btn:hover {
+            background: linear-gradient(135deg, #0e7490 0%, #155e75 100%);
+            box-shadow: 0 8px 20px rgba(8, 145, 178, 0.4);
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+            font-size: 1.3em;
+            grid-column: 1 / -1;
+        }
+        
+        @media (max-width: 768px) {
+            .profiles-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .header-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .sort-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .sort-button {
+                width: 100%;
+            }
+            
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Login Modal Styles */
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .login-container h2 {
+            color: #1e293b;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .login-warning {
+            color: #f59e0b;
+            font-size: 0.9em;
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 10px;
+            background: #fef3c7;
+            border-radius: 8px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            color: #475569;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #475569;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #475569 0%, #64748b 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(71, 85, 105, 0.4);
+        }
+        
+        .login-error {
+            color: #dc2626;
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #fee2e2;
+            display: none;
+        }
+        
+        .login-error.show {
+            display: block;
+        }
+        
+        .logout-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 38, 38, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Modal -->
+    <div id="loginModal" class="login-modal">
+        <div class="login-container">
+            <h2>Login to Saptpadi</h2>
+            <p class="login-warning">⚠️ Your credentials will only be stored in this browser session</p>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="userEmail">Email / User ID:</label>
+                    <input type="text" id="userEmail" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="userPass">Password:</label>
+                    <input type="password" id="userPass" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="login-btn">Login</button>
+            </form>
+            <div id="loginError" class="login-error"></div>
+        </div>
+    </div>
+
+    <div class="container" id="mainContent" style="display: none;">
+        <div class="header-section">
+            <h1>Profile Directory</h1>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <button class="shortlist-filter-btn" onclick="toggleShortlistFilter()">
+                    <span id="filterBtnText">Show Shortlisted</span>
+                    <span class="shortlist-count" id="shortlistCount">0</span>
+                </button>
+                <button class="logout-btn" onclick="handleLogout()">Logout</button>
+            </div>
+        </div>
+        
+        <div class="controls-section">
+            <div class="search-container">
+                <label for="searchInput">Search by Name or Location</label>
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    class="search-input" 
+                    placeholder="Type to search..."
+                    onkeyup="searchProfiles()"
+                >
+            </div>
+            
+            <div class="sort-container">
+                <label>Sort By:</label>
+                <button class="sort-button" onclick="sortProfiles('name')">Name</button>
+                <button class="sort-button" onclick="sortProfiles('location')">Location</button>
+                <button class="sort-button" onclick="sortProfiles('dob')">Date of Birth</button>
+                <button class="sort-button" onclick="sortProfiles('height')">Height</button>
+            </div>
+        </div>
+        
+        <div class="profiles-grid" id="profilesGrid"></div>
+    </div>
+    
+    <!-- <script src="profiles_data.js"></script> -->
+    <script>
+        // Authentication and credentials management
+        let userCredentials = {
+            email: '',
+            password: '',
+            sessionId: ''
+        };
+        
+        // Set cookies manually (since the site uses plain text cookies)
+        function setCookie(name, value, days = 1) {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+            document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;domain=.saptpadi.in`;
+        }
+        
+        // Get cookie value
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+        
+        // Handle login
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('userEmail').value;
+            const password = document.getElementById('userPass').value;
+            const errorDiv = document.getElementById('loginError');
+            const loginBtn = event.target.querySelector('.login-btn');
+            
+            // Show loading state
+            loginBtn.textContent = 'Logging in...';
+            loginBtn.disabled = true;
+            errorDiv.classList.remove('show');
+            
+            try {
+                // Store credentials
+                userCredentials.email = email;
+                userCredentials.password = password;
+				
+                //const sessionId = Math.random().toString(36).substring(2) + Date.now().toString(36);
+				const sessionId = '5ec9b10a431cd1525a428f385ad24cd9'
+				//setCookie('user', email);
+                //setCookie('pass', password);
+				
+				userCredentials.sessionId = sessionId;
+				setCookie('PHPSESSID', sessionId);
+				
+                // Try to authenticate by making a test API call
+                const testResponse = await fetch('https://www.saptpadi.in/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'Origin': 'https://www.saptpadi.in'
+                        //'Cookie': `PHPSESSID=${sessionId}`
+                    },
+                    body: 'username=gandhisagar12%40gmail.com&password=24%23Tirthankar&member_login=Login'
+                });
+                
+                if (testResponse.ok) {
+                    // Set cookies (mimicking how the site does it)
+                    setCookie('user', email);
+                    setCookie('pass', password);
+                    
+                    // Generate a fake session ID (since we don't know the real format)
+                    //const sessionId = Math.random().toString(36).substring(2) + Date.now().toString(36);
+                    //setCookie('PHPSESSID', sessionId);
+                    //userCredentials.sessionId = sessionId;
+                    
+                    // Hide login modal and show main content
+                    document.getElementById('loginModal').style.display = 'none';
+                    document.getElementById('mainContent').style.display = 'block';
+                    
+                    // Initialize the app
+                    await initializeApp();
+                } else {
+                    throw new Error('Authentication failed');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorDiv.textContent = 'Login failed. Please check your credentials and make sure you can access saptpadi.in';
+                errorDiv.classList.add('show');
+            } finally {
+                loginBtn.textContent = 'Login';
+                loginBtn.disabled = false;
+            }
+        }
+        
+        // Handle logout
+        function handleLogout() {
+            // Clear credentials
+            userCredentials = { email: '', password: '', sessionId: '' };
+            
+            // Clear cookies
+            document.cookie.split(";").forEach(function(c) { 
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+            });
+            
+            // Show login modal and hide main content
+            document.getElementById('loginModal').style.display = 'flex';
+            document.getElementById('mainContent').style.display = 'none';
+            
+            // Clear the form
+            document.getElementById('loginForm').reset();
+        }
+        
+        // Initialize the app after login
+        async function initializeApp() {
+            currentProfiles = [...profilesData];
+            renderProfiles(currentProfiles);
+            
+            // Load shortlist from API in background
+            try {
+                await fetchShortlistedProfiles();
+                // Re-render to update star icons
+                renderProfiles(currentProfiles);
+            } catch (error) {
+                console.log('Could not load shortlist on page load:', error);
+            }
+        }
+        
+        // Profile data is loaded from profiles_data.js
+        let currentProfiles = [];
+        let showingShortlisted = false;
+        
+		const profilesData = [
+  {
+    "name": "JAGRUTI VASANTBHAITHAKKAR",
+    "dob": "9/22/1996",
+    "height": "5ft 4in",
+    "religion": "Hindu",
+    "caste": "Gujarati",
+    "image": "https://www.saptpadi.in/photos/watermark.php?image=1770468495-1.jpg&watermark=watermark.png",
+    "photoAlbum": "https://www.saptpadi.in/view_photo_album?matri_id=SPTPD4310",
+    "fullProfile": "https://www.saptpadi.in/memberFullProfile?user_id=SPTPD4310",
+    "location": "Mulund, Maharashtra, India",
+    "education": "CA",
+    "occupation": "Manager",
+    "subCaste": "Lohana",
+    "aboutMe": "EDUCATION- CAOCCUPATION- MNAGER AT MORGAN STANLE...Read More",
+    "id": "SPTPD4310",
+    "contact": "https://www.saptpadi.in/web-services/contact_detail?toid=SPTPD4310"
+  },
+  {
+    "name": "AVNI AMITBHAI DESAI",
+    "dob": "9/20/1997",
+    "height": "5ft 5in",
+    "religion": "Hindu",
+    "caste": "Gujarati",
+    "image": "https://www.saptpadi.in/photos/watermark.php?image=1770195563-1.jpg&watermark=watermark.png",
+    "photoAlbum": "https://www.saptpadi.in/view_photo_album?matri_id=SPTPD4305",
+    "fullProfile": "https://www.saptpadi.in/memberFullProfile?user_id=SPTPD4305",
+    "location": "Kandivli, Maharashtra, India",
+    "education": "BA",
+    "occupation": "Business",
+    "subCaste": "Vaishnav",
+    "aboutMe": "EDUCATION- BA IN FASHIONOCCUPATION- FOUNDER- GRE...Read More",
+    "id": "SPTPD4305",
+    "contact": "https://www.saptpadi.in/web-services/contact_detail?toid=SPTPD4305"
+  },
+  {
+    "name": "KAVINA AMRISHBHAI BAVISI",
+    "dob": "12/9/1995",
+    "height": "5ft 0in",
+    "religion": "Jain",
+    "caste": "Gujarati",
+    "image": "https://www.saptpadi.in/photos/watermark.php?image=1770036486-1.jpg&watermark=watermark.png",
+    "photoAlbum": "https://www.saptpadi.in/view_photo_album?matri_id=SPTPD4298",
+    "fullProfile": "https://www.saptpadi.in/memberFullProfile?user_id=SPTPD4298",
+    "location": "Ahmadabad, Gujarat, India",
+    "education": "PGD",
+    "occupation": "Freelance",
+    "subCaste": "Dasa Shrimadi Jain",
+    "aboutMe": "EDUCATION- PG IN MAREKTING, ADVERTISING AND COMMUN...Read More",
+    "id": "SPTPD4298",
+    "contact": "https://www.saptpadi.in/web-services/contact_detail?toid=SPTPD4298"
+  },
+  {
+    "name": "MEGHNA HIMANSHUBHAI DESAI",
+    "dob": "12/11/1998",
+    "height": "5ft 0in",
+    "religion": "Jain",
+    "caste": "Gujarati",
+    "image": "https://www.saptpadi.in/photos/watermark.php?image=1769775844-1.jpg&watermark=watermark.png",
+    "photoAlbum": "https://www.saptpadi.in/view_photo_album?matri_id=SPTPD4294",
+    "fullProfile": "https://www.saptpadi.in/memberFullProfile?user_id=SPTPD4294",
+    "location": "Borivli, Maharashtra, India",
+    "education": "B Com,Digital Marketing,Pursuing MBA",
+    "occupation": "JOB",
+    "subCaste": "deravasi jain",
+    "aboutMe": "EDUCATION- B.COM, DIGITAL MARKETING, PURSUING ONLI...Read More",
+    "id": "SPTPD4294",
+    "contact": "https://www.saptpadi.in/web-services/contact_detail?toid=SPTPD4294"
+  },
+  {
+    "name": "PARNEETA MANOJ MADHANI",
+    "dob": "8/28/1995",
+    "height": "5ft 4in",
+    "religion": "Jain",
+    "caste": "Gujarati",
+    "image": "https://www.saptpadi.in/photos/watermark.php?image=1769775301-1.jpg&watermark=watermark.png",
+    "photoAlbum": "https://www.saptpadi.in/view_photo_album?matri_id=SPTPD4293",
+    "fullProfile": "https://www.saptpadi.in/memberFullProfile?user_id=SPTPD4293",
+    "location": "Borivli, Maharashtra, India",
+    "education": "CA Inter,MBA in Finance",
+    "occupation": "JOB",
+    "subCaste": "Visa Porwad Jain",
+    "aboutMe": "EDUCATION- CA INTER CLEARED, MBA IN FINANCEOCCUP...Read More",
+    "id": "SPTPD4293",
+    "contact": "https://www.saptpadi.in/web-services/contact_detail?toid=SPTPD4293"
+  },
+  {
+    "name": "AASHKA RAJUBHAI SHAH",
+    "dob": "11/13/1997",
+    "height": "5ft 2in",
+    "religion": "Jain",
+    "caste": "Gujarati",
+    "image": "https://www.saptpadi.in/photos/watermark.php?image=1769773903-1.jpg&watermark=watermark.png",
+    "photoAlbum": "https://www.saptpadi.in/view_photo_album?matri_id=SPTPD4290",
+    "fullProfile": "https://www.saptpadi.in/memberFullProfile?user_id=SPTPD4290",
+    "location": "Sion, Maharashtra, India",
+    "education": "B Com,CA Final",
+    "occupation": "JOB",
+    "subCaste": "sthanakvasi jain",
+    "aboutMe": "EDUCATION- CA FINALIST, B.COMOCCUPATION- ASSOCIA...Read More",
+    "id": "SPTPD4290",
+    "contact": "https://www.saptpadi.in/web-services/contact_detail?toid=SPTPD4290"
+  },
+  {
+    "name": "MANSI PARAGBHAI SHAH",
+    "dob": "9/5/1994",
+    "height": "5ft 4in",
+    "religion": "Jain",
+    "caste": "Gujarati",
+    "image": "https://www.saptpadi.in/photos/watermark.php?image=1769689188-1.jpg&watermark=watermark.png",
+    "photoAlbum": "https://www.saptpadi.in/view_photo_album?matri_id=SPTPD4287",
+    "fullProfile": "https://www.saptpadi.in/memberFullProfile?user_id=SPTPD4287",
+    "location": "Borivli, Maharashtra, India",
+    "education": "B Com,CS (Executive level),LLB",
+    "occupation": "JOB",
+    "subCaste": "zalawadi jain",
+    "aboutMe": "EUCATION- CS, LLB, B.COMOCCUPATION- ASS. MANAGER...Read More",
+    "id": "SPTPD4287",
+    "contact": "https://www.saptpadi.in/web-services/contact_detail?toid=SPTPD4287"
+  },
+  {
+    "name": "FORAM MAYANKBHAI DOSHI",
+    "dob": "5/26/1997",
+    "height": "5ft 2in",
+    "religion": "Jain",
+    "caste": "Gujarati",
+    "image": "https://www.saptpadi.in/photos/watermark.php?image=1769688251-1.jpg&watermark=watermark.png",
+    "photoAlbum": "https://www.saptpadi.in/view_photo_album?matri_id=SPTPD4285",
+    "fullProfile": "https://www.saptpadi.in/memberFullProfile?user_id=SPTPD4285",
+    "location": "Kandivli, Maharashtra, India",
+    "education": "ACCA,B Com",
+    "occupation": "Teacher",
+    "subCaste": "deravasi jain",
+    "aboutMe": "EDUCATION- ACCA(UK), B.COMOCCUPATION- ACCA TUTOR...Read More",
+    "id": "SPTPD4285",
+    "contact": "https://www.saptpadi.in/web-services/contact_detail?toid=SPTPD4285"
+  },
+  {
+    "name": "SHIKHA NIKHIL SHAH",
+    "dob": "8/22/1994",
+    "height": "5ft 1in",
+    "religion": "Jain",
+    "caste": "Gujarati",
+    "image": "https://www.saptpadi.in/photos/watermark.php?image=1769687800-1.jpg&watermark=watermark.png",
+    "photoAlbum": "https://www.saptpadi.in/view_photo_album?matri_id=SPTPD4284",
+    "fullProfile": "https://www.saptpadi.in/memberFullProfile?user_id=SPTPD4284",
+    "location": "Borivli, Maharashtra, India",
+    "education": "B Com,Interior Designing",
+    "occupation": "JOB",
+    "subCaste": "deravasi jain",
+    "aboutMe": "EDUCATION- INTERIOR DESIGNER, B.COMOCCUPATION- S...Read More",
+    "id": "SPTPD4284",
+    "contact": "https://www.saptpadi.in/web-services/contact_detail?toid=SPTPD4284"
+  },
+  {
+    "name": "VIDHI HEMESH MORKHIA",
+    "dob": "4/11/1997",
+    "height": "5ft 2in",
+    "religion": "Jain",
+    "caste": "Gujarati",
+    "image": "https://www.saptpadi.in/photos/watermark.php?image=1769603599-1.jpg&watermark=watermark.png",
+    "photoAlbum": "https://www.saptpadi.in/view_photo_album?matri_id=SPTPD4283",
+    "fullProfile": "https://www.saptpadi.in/memberFullProfile?user_id=SPTPD4283",
+    "location": "Borivli, Maharashtra, India",
+    "education": "MA",
+    "occupation": "Own Practice",
+    "subCaste": "deravasi jain",
+    "aboutMe": "EDUCATION- BA, MA, NPCAOCCUPATION- FREELANCE THR...Read More",
+    "id": "SPTPD4283",
+    "contact": "https://www.saptpadi.in/web-services/contact_detail?toid=SPTPD4283"
+  },
+  {
+    "name": "Karishma Sanghvi",
+    "dob": "5/6/1992",
+    "height": "5ft 3in",
+    "religion": "Jain",
+    "caste": "Gujarati",
+    "image": "https://www.saptpadi.in/photos/watermark.php?image=1612973268.jpg&watermark=watermark.png",
+    "photoAlbum": "https://www.saptpadi.in/view_photo_album?matri_id=SPTPD105",
+    "fullProfile": "https://www.saptpadi.in/memberFullProfile?user_id=SPTPD105",
+    "location": "Mumbai, Maharashtra, India",
+    "education": "B Com",
+    "occupation": "Others",
+    "subCaste": "Swetambar",
+    "aboutMe": "I have completed my graduation from K.J. Somaiya C...Read More",
+    "id": "SPTPD105",
+    "contact": "https://www.saptpadi.in/web-services/contact_detail?toid=SPTPD105"
+  }
+];
+
+        // Function to calculate age
+        function calculateAge(dobString) {
+            const dob = new Date(dobString);
+            const today = new Date();
+            let age = today.getFullYear() - dob.getFullYear();
+            const monthDiff = today.getMonth() - dob.getMonth();
+            
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+                age--;
+            }
+            
+            return age;
+        }
+        
+        // Function to format date from MM/DD/YYYY to DD Month YYYY
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                          'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            const day = date.getDate();
+            const month = months[date.getMonth()];
+            const year = date.getFullYear();
+            
+            return `${day} ${month} ${year}`;
+        }
+        
+        // Function to parse height for sorting
+        function parseHeight(heightStr) {
+            const match = heightStr.match(/(\d+)ft\s*(\d+)in/);
+            if (match) {
+                return parseInt(match[1]) * 12 + parseInt(match[2]);
+            }
+            return 0;
+        }
+        
+        // Function to parse date for sorting
+        function parseDate(dateStr) {
+            return new Date(dateStr);
+        }
+        
+        // Function to process "About Me" text and add Read More link
+        function processAboutMe(aboutText, fullProfileUrl) {
+            if (!aboutText) return '';
+            
+            // Replace "Read More" or "...Read More" with a link
+            const linkText = '<a href="' + fullProfileUrl + '" target="_blank">Read More</a>';
+            return aboutText.replace(/\.\.\.Read More|Read More/gi, linkText);
+        }
+        
+        // Shortlist management with API calls
+        let shortlistCache = [];
+        
+        function getShortlist() {
+            return shortlistCache;
+        }
+        
+        function updateShortlistCount() {
+            document.getElementById('shortlistCount').textContent = shortlistCache.length;
+        }
+        
+        // Toggle shortlist for a profile
+        async function toggleShortlist(profileId) {
+            const starBtn = document.querySelector(`[data-profile-id="${profileId}"]`);
+            const isCurrentlyShortlisted = shortlistCache.includes(profileId);
+            
+            try {
+                // Show loading state
+                if (starBtn) {
+                    starBtn.disabled = true;
+                    starBtn.style.opacity = '0.5';
+                }
+                
+                let formData;
+                if (isCurrentlyShortlisted) {
+                    // Remove from shortlist
+                    formData = `id=${profileId}`;
+                } else {
+                    // Add to shortlist
+                    formData = `add_id=${profileId}`;
+                }
+                
+                const response = await fetch('https://www.saptpadi.in/addshortlist', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'Origin': 'https://www.saptpadi.in',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    },
+                    credentials: 'include', // This sends cookies
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    // Update cache
+                    if (isCurrentlyShortlisted) {
+                        shortlistCache = shortlistCache.filter(id => id !== profileId);
+                    } else {
+                        shortlistCache.push(profileId);
+                    }
+                    
+                    // Update the star icon
+                    if (starBtn) {
+                        starBtn.textContent = shortlistCache.includes(profileId) ? '⭐' : '☆';
+                        starBtn.title = shortlistCache.includes(profileId) ? 'Remove from shortlist' : 'Add to shortlist';
+                        starBtn.classList.add('active');
+                        setTimeout(() => starBtn.classList.remove('active'), 500);
+                    }
+                    
+                    updateShortlistCount();
+                } else {
+                    console.error('Failed to update shortlist:', response.status);
+                    alert('Failed to update shortlist. You may need to log in again.');
+                }
+            } catch (error) {
+                console.error('Error updating shortlist:', error);
+                alert('Error updating shortlist. Please check your connection and try again.');
+            } finally {
+                // Restore button state
+                if (starBtn) {
+                    starBtn.disabled = false;
+                    starBtn.style.opacity = '1';
+                }
+            }
+        }
+        
+        function isShortlisted(profileId) {
+            return shortlistCache.includes(profileId);
+        }
+        
+        // Parse HTML response to extract profile IDs
+        function extractIDsFromHTML(html) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const ids = [];
+            
+            // Find all spans with profile IDs (pattern: Id : <span>SPTPDXXXX</span>)
+            const idElements = doc.querySelectorAll('span');
+            idElements.forEach(span => {
+                const text = span.textContent.trim();
+                if (text.match(/^SPTPD\d+$/)) {
+                    ids.push(text);
+                }
+            });
+            
+            return ids;
+        }
+        
+        // Extract total pages from HTML response
+        function extractTotalPages(html) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Find pagination links
+            const pageLinks = doc.querySelectorAll('.pagination a.page-numbers');
+            let maxPage = 1;
+            
+            pageLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href) {
+                    const match = href.match(/page=(\d+)/);
+                    if (match) {
+                        const pageNum = parseInt(match[1]);
+                        if (pageNum > maxPage) {
+                            maxPage = pageNum;
+                        }
+                    }
+                }
+            });
+            
+            return maxPage;
+        }
+        
+        // Fetch shortlisted profiles from API
+        async function fetchShortlistedProfiles() {
+            try {
+                // Show loading state
+                const btn = document.querySelector('.shortlist-filter-btn');
+                const btnText = document.getElementById('filterBtnText');
+                const originalText = btnText.textContent;
+                btnText.textContent = 'Loading...';
+                btn.disabled = true;
+                
+                // Fetch first page to get total pages
+                const firstPageResponse = await fetch('https://www.saptpadi.in/short_list_result', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'Origin': 'https://www.saptpadi.in',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                    },
+                    credentials: 'include',
+                    body: 'actionfunction=showData&page=1'
+                });
+                
+                if (!firstPageResponse.ok) {
+                    throw new Error('Failed to fetch shortlisted profiles');
+                }
+                
+                const firstPageHTML = await firstPageResponse.text();
+                const totalPages = extractTotalPages(firstPageHTML);
+                let allIds = extractIDsFromHTML(firstPageHTML);
+                
+                // Fetch remaining pages if any
+                if (totalPages > 1) {
+                    const pagePromises = [];
+                    for (let page = 2; page <= totalPages; page++) {
+                        pagePromises.push(
+                            fetch('https://www.saptpadi.in/short_list_result', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                                    'Origin': 'https://www.saptpadi.in',
+                                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                                },
+                                credentials: 'include',
+                                body: `actionfunction=showData&page=${page}`
+                            }).then(res => res.text())
+                        );
+                    }
+                    
+                    const pagesHTML = await Promise.all(pagePromises);
+                    pagesHTML.forEach(html => {
+                        const ids = extractIDsFromHTML(html);
+                        allIds = allIds.concat(ids);
+                    });
+                }
+                
+                // Get unique IDs
+                shortlistCache = [...new Set(allIds)];
+                updateShortlistCount();
+                
+                // Restore button state
+                btn.disabled = false;
+                btnText.textContent = originalText;
+                
+                return shortlistCache;
+                
+            } catch (error) {
+                console.error('Error fetching shortlisted profiles:', error);
+                alert('Error fetching shortlisted profiles. You may need to log in again.');
+                
+                // Restore button
+                const btn = document.querySelector('.shortlist-filter-btn');
+                const btnText = document.getElementById('filterBtnText');
+                btn.disabled = false;
+                btnText.textContent = 'Show Shortlisted';
+                
+                return [];
+            }
+        }
+        
+        // Toggle between showing all profiles and shortlisted only
+        async function toggleShortlistFilter() {
+            showingShortlisted = !showingShortlisted;
+            const btn = document.querySelector('.shortlist-filter-btn');
+            const btnText = document.getElementById('filterBtnText');
+            
+            if (showingShortlisted) {
+                // Fetch shortlisted profiles from API
+                await fetchShortlistedProfiles();
+                
+                btn.classList.add('active');
+                btnText.textContent = 'Show All';
+                
+                // Filter profiles to show only shortlisted ones
+                currentProfiles = profilesData.filter(p => shortlistCache.includes(p.id));
+            } else {
+                btn.classList.remove('active');
+                btnText.textContent = 'Show Shortlisted';
+                currentProfiles = [...profilesData];
+                
+                // Re-apply search if there's a search term
+                const searchTerm = document.getElementById('searchInput').value;
+                if (searchTerm) {
+                    searchProfiles();
+                    return;
+                }
+            }
+            
+            renderProfiles(currentProfiles);
+        }
+        
+        // Function to render profiles
+        function renderProfiles(profiles) {
+            const grid = document.getElementById('profilesGrid');
+            
+            if (profiles.length === 0) {
+                grid.innerHTML = '<div class="no-results">No profiles found matching your criteria.</div>';
+                return;
+            }
+            
+            grid.innerHTML = profiles.map(profile => {
+                const age = calculateAge(profile.dob);
+                const formattedDob = formatDate(profile.dob);
+                const aboutMeWithLink = processAboutMe(profile.aboutMe, profile.fullProfile);
+                const isInShortlist = isShortlisted(profile.id);
+                
+                return `
+                <div class="profile-card">
+                    <div class="profile-image-container">
+                        <img src="${profile.image}" 
+                             alt="${profile.name}" 
+                             class="profile-image"
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22400%22%3E%3Crect fill=%22%23ddd%22 width=%22400%22 height=%22400%22/%3E%3Ctext fill=%22%23999%22 font-family=%22sans-serif%22 font-size=%2224%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3ENo Image%3C/text%3E%3C/svg%3E'">
+                    </div>
+                    <div class="profile-content">
+                        <div class="profile-header">
+                            <div class="profile-header-row">
+                                <h2 class="profile-name">${profile.name}</h2>
+                                <div class="profile-id-container">
+                                    <div class="profile-id">${profile.id}</div>
+                                    <button class="shortlist-badge" 
+                                            data-profile-id="${profile.id}" 
+                                            onclick="toggleShortlist('${profile.id}')"
+                                            title="${isInShortlist ? 'Remove from shortlist' : 'Add to shortlist'}">
+                                        ${isInShortlist ? '⭐' : '☆'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-details">
+                            <div class="detail-row">
+                                <span class="detail-label">Date of Birth:</span>
+                                <span class="detail-value">${formattedDob}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Age:</span>
+                                <span class="detail-value">${age} years</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Height:</span>
+                                <span class="detail-value">${profile.height}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Religion:</span>
+                                <span class="detail-value">${profile.religion}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Caste:</span>
+                                <span class="detail-value">${profile.caste}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Sub-Caste:</span>
+                                <span class="detail-value">${profile.subCaste}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Location:</span>
+                                <span class="detail-value">${profile.location}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Education:</span>
+                                <span class="detail-value">${profile.education}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Occupation:</span>
+                                <span class="detail-value">${profile.occupation}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-description">
+                            ${aboutMeWithLink}
+                        </div>
+                        
+                        <div class="button-group">
+                            <button class="view-photo-btn" onclick="viewPhoto('${profile.photoAlbum}')">
+                                VIEW PHOTO
+                            </button>
+                            <button class="view-contact-btn" onclick="viewContact('${profile.contact}')">
+                                VIEW CONTACT
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+        
+        // Function to search profiles
+        function searchProfiles() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            let baseProfiles = showingShortlisted 
+                ? profilesData.filter(p => getShortlist().includes(p.id))
+                : profilesData;
+            
+            currentProfiles = baseProfiles.filter(profile => 
+                profile.name.toLowerCase().includes(searchTerm) || 
+                profile.location.toLowerCase().includes(searchTerm)
+            );
+            
+            renderProfiles(currentProfiles);
+        }
+        
+        // Function to sort profiles
+        function sortProfiles(sortBy) {
+            // Remove active class from all buttons
+            document.querySelectorAll('.sort-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+            
+            const sorted = [...currentProfiles];
+            
+            switch(sortBy) {
+                case 'name':
+                    sorted.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+                case 'location':
+                    sorted.sort((a, b) => a.location.localeCompare(b.location));
+                    break;
+                case 'dob':
+                    sorted.sort((a, b) => parseDate(a.dob) - parseDate(b.dob));
+                    break;
+                case 'height':
+                    sorted.sort((a, b) => parseHeight(b.height) - parseHeight(a.height));
+                    break;
+            }
+            
+            currentProfiles = sorted;
+            renderProfiles(currentProfiles);
+        }
+        
+        // Function to view photo album
+        function viewPhoto(photoAlbumUrl) {
+            window.open(photoAlbumUrl, '_blank');
+        }
+        
+        // Function to view contact
+        function viewContact(contactUrl) {
+            window.open(contactUrl, '_blank');
+        }
+        
+        // Initialize when page loads
+        window.onload = function() {
+            // Show login modal on page load
+            document.getElementById('loginModal').style.display = 'flex';
+            document.getElementById('mainContent').style.display = 'none';
+        };
+    </script>
+</body>
+</html>
