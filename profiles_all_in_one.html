@@ -5,6 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile Directory</title>
     <style>
+	
+		.pagination {
+		display:flex;
+		justify-content:center;
+		flex-wrap:wrap;
+		gap:8px;
+	}
+
+	.page-btn {
+		padding:8px 14px;
+		border:none;
+		border-radius:8px;
+		background:#e2e8f0;
+		cursor:pointer;
+		transition: all 0.25s ease;
+	}
+
+	.page-btn:hover {
+		transform: translateY(-3px) scale(1.08);
+		background:#cbd5f5;
+	}
+
+	.page-btn.active {
+		background:#475569;
+		color:white;
+		transform: scale(1.15);
+	}
+
         * {
             margin: 0;
             padding: 0;
@@ -363,7 +391,7 @@
     <div class="container">
         <div class="header-section">
             <h1>Profile Directory</h1>
-            <button class="shortlist-filter-btn" onclick="toggleShortlistFilter()">
+            <button id="shortlistToggleBtn" class="shortlist-filter-btn" onclick="toggleShortlistFilter()">
                 <span id="filterBtnText">Show Shortlisted</span>
                 <span class="shortlist-count" id="shortlistCount">0</span>
             </button>
@@ -380,7 +408,17 @@
                     onkeyup="searchProfiles()"
                 >
             </div>
-            
+			
+            <!--<div class="search-container">
+				<label style="margin-left:10px;">Page size:
+				<select id="pageSizeSelector" onchange="changePageSize()">
+				<option value="6">6</option>
+				<option value="12">12</option>
+				<option value="24">24</option>
+				</select>
+				</label>
+			</div>-->
+			
             <div class="sort-container">
                 <label>Sort By:</label>
                 <button class="sort-button" onclick="sortProfiles('name')">Name</button>
@@ -389,15 +427,27 @@
                 <button class="sort-button" onclick="sortProfiles('height')">Height</button>
             </div>
         </div>
-        
+		<div id="paginationContainer" style="margin-top:40px; text-align:center;"></div>
+        <div id="resultsInfo" style="margin:10px 0;font-weight:600;"></div>
         <div class="profiles-grid" id="profilesGrid"></div>
+		<!--<div id="paginationContainer" style="margin-top:40px; text-align:center;"></div>-->
+
     </div>
     
     <!-- <script src="profiles_data.js"></script> -->
     <script>
         // Profile data is loaded from profiles_data.js
+		let currentPage = 1;
+		let profilesPerPage = 5; // Change this to 4, 8, etc.
+
         let currentProfiles = [];
         let showingShortlisted = false;
+		let showShortlistOnly = false;
+		
+		let shortlist = JSON.parse(
+			localStorage.getItem("profileShortlist") || "[]"
+		);
+
         const profilesData = [
   {
     "name": "CA DEVANSHI AJAY DOSHI",
@@ -14833,6 +14883,45 @@
     "contact": "https://www.saptpadi.in/web-services/contact_detail?toid=SPTPD105"
   }
 ];
+
+		function updateURLState() {
+			const params = new URLSearchParams();
+
+			params.set('page', currentPage);
+			params.set('size', profilesPerPage);
+
+			history.replaceState(null, '', '?' + params.toString());
+		}
+
+		function restoreStateFromURL() {
+			const params = new URLSearchParams(window.location.search);
+
+			currentPage = parseInt(params.get('page')) || 1;
+			profilesPerPage = parseInt(params.get('size')) || 6;
+
+			const selector = document.getElementById('pageSizeSelector');
+			if (selector) selector.value = profilesPerPage;
+		}
+
+		function changePageSize() {
+			profilesPerPage =
+				parseInt(document.getElementById('pageSizeSelector').value);
+
+			currentPage = 1;
+			updateURLState();
+			renderProfiles(currentProfiles);
+		}
+
+		function changePage(page) {
+			currentPage = page;
+			updateURLState();
+
+			document.getElementById('profilesGrid')
+				.scrollIntoView({behavior:"smooth"});
+
+			renderProfiles(currentProfiles);
+		}
+
         // Function to calculate age
         function calculateAge(dobString) {
             const dob = new Date(dobString);
@@ -14959,52 +15048,65 @@
         }
         
         function updateShortlistCount() {
-            const count = getShortlist().length;
-            document.getElementById('shortlistCount').textContent = count;
-        }
+
+			const el = document.getElementById("shortlistCount");
+
+			if (!el) return; // prevents crashes if DOM changes
+
+			el.textContent = shortlist.length;
+		}
+
         
         function toggleShortlistFilter() {
-            showingShortlisted = !showingShortlisted;
-            const btn = document.querySelector('.shortlist-filter-btn');
-            const btnText = document.getElementById('filterBtnText');
-            
-            if (showingShortlisted) {
-                btn.classList.add('active');
-                btnText.textContent = 'Show All';
-                const shortlist = getShortlist();
-                currentProfiles = profilesData.filter(p => shortlist.includes(p.id));
-            } else {
-                btn.classList.remove('active');
-                btnText.textContent = 'Show Shortlisted';
-                currentProfiles = [...profilesData];
-                // Re-apply search if there's a search term
-                const searchTerm = document.getElementById('searchInput').value;
-                if (searchTerm) {
-                    searchProfiles();
-                    return;
-                }
-            }
-            
-            renderProfiles(currentProfiles);
-        }
+
+			showShortlistOnly = !showShortlistOnly;
+
+			document.getElementById('shortlistToggleBtn').innerText =
+				showShortlistOnly
+				? "Show All Profiles"
+				: "Show Shortlist";
+
+			rebuildProfilesView();
+		}
+
         
         // Function to render profiles
         function renderProfiles(profiles) {
-            const grid = document.getElementById('profilesGrid');
-            
-            if (profiles.length === 0) {
-                grid.innerHTML = '<div class="no-results">No profiles found matching your criteria.</div>';
-                return;
-            }
-            
-            grid.innerHTML = profiles.map(profile => {
-                const age = calculateAge(profile.dob);
-                const formattedDob = formatDate(profile.dob);
-                const aboutMeWithLink = processAboutMe(profile.aboutMe, profile.fullProfile);
-                const isInShortlist = isShortlisted(profile.id);
-                
-                return `
-                <div class="profile-card">
+			const grid = document.getElementById('profilesGrid');
+			const paginationContainer = document.getElementById('paginationContainer');
+
+			if (profiles.length === 0) {
+				grid.innerHTML = '<div class="no-results">No profiles found matching your criteria.</div>';
+				paginationContainer.innerHTML = '';
+				return;
+			}
+
+			const totalPages = Math.ceil(profiles.length / profilesPerPage);
+
+			// Ensure currentPage stays valid
+			if (currentPage > totalPages) {
+				currentPage = 1;
+			}
+
+			const startIndex = (currentPage - 1) * profilesPerPage;
+			const endIndex = startIndex + profilesPerPage;
+			const paginatedProfiles = profiles.slice(startIndex, endIndex);
+
+			const info = document.getElementById('resultsInfo');
+			const startDisplay = profiles.length === 0 ? 0 : startIndex + 1;
+			const endDisplay = Math.min(endIndex, profiles.length);
+
+			info.innerText =
+				`Showing ${startDisplay}-${endDisplay} of ${profiles.length} profiles`;
+
+			grid.innerHTML = paginatedProfiles.map(profile => {
+				const age = calculateAge(profile.dob);
+				const formattedDob = formatDate(profile.dob);
+				const aboutMeWithLink = processAboutMe(profile.aboutMe, profile.fullProfile);
+				const isInShortlist = isShortlisted(profile.id);
+
+				return `
+				<div class="profile-card">
                     <div class="profile-image-container">
                         <img src="${profile.image}" 
                              alt="${profile.name}" 
@@ -15081,24 +15183,129 @@
                     </div>
                 </div>
             `}).join('');
-        }
+			
+			renderPagination(totalPages);
+		}
         
+		function applyDefaultSorting() {
+			currentProfiles = [...profilesData].sort((a, b) => {
+				return new Date(a.dob) - new Date(b.dob); 
+				// Older first. Flip sign if you want younger first.
+			});
+		}
+
+		function sortByDOB(profiles) {
+			return [...profiles].sort((a, b) =>
+				new Date(a.dob) - new Date(b.dob)
+			);
+		}
+
+		function renderPagination(totalPages) {
+			const container = document.getElementById('paginationContainer');
+
+			if (totalPages <= 1) {
+				container.innerHTML = '';
+				return;
+			}
+
+			const delta = 2; // pages around current page
+			const range = [];
+			const rangeWithDots = [];
+
+			// Always include first and last
+			for (let i = 1; i <= totalPages; i++) {
+				if (
+					i === 1 ||
+					i === totalPages ||
+					(i >= currentPage - delta && i <= currentPage + delta)
+				) {
+					range.push(i);
+				}
+			}
+
+			// Inject dots
+			let prev;
+			for (let i of range) {
+				if (prev) {
+					if (i - prev === 2) {
+						rangeWithDots.push(prev + 1);
+					} else if (i - prev > 2) {
+						rangeWithDots.push("...");
+					}
+				}
+				rangeWithDots.push(i);
+				prev = i;
+			}
+
+			let html = `<div class="pagination">`;
+
+			if (currentPage > 1) {
+				html += `<button class="page-btn" onclick="changePage(${currentPage-1})">Prev</button>`;
+			}
+
+			rangeWithDots.forEach(p => {
+				if (p === "...") {
+					html += `<span style="padding:8px 6px;">…</span>`;
+				} else {
+					html += `
+						<button class="page-btn ${p===currentPage?'active':''}"
+							onclick="changePage(${p})">${p}</button>
+					`;
+				}
+			});
+
+			if (currentPage < totalPages) {
+				html += `<button class="page-btn" onclick="changePage(${currentPage+1})">Next</button>`;
+			}
+
+			html += `</div>`;
+			container.innerHTML = html;
+		}
+
+
+		
+		function changePage(page) {
+			currentPage = page;
+			renderProfiles(currentProfiles);
+		}
+
+		function rebuildProfilesView() {
+
+			let base = [...profilesData];
+
+			// Apply shortlist filter
+			if (showShortlistOnly) {
+				base = base.filter(p => shortlist.includes(p.id));
+			}
+
+			// Apply search filter
+			const searchText =
+				document.getElementById('searchInput').value
+					.toLowerCase()
+					.trim();
+
+			if (searchText.length > 0) {
+				base = base.filter(profile =>
+					profile.name.toLowerCase().includes(searchText) ||
+					profile.location.toLowerCase().includes(searchText) ||
+					profile.id.toLowerCase().includes(searchText)
+				);
+			}
+
+			// Always apply default sort
+			currentProfiles = sortByDOB(base);
+
+			currentPage = 1;
+			updateURLState();
+			renderProfiles(currentProfiles);
+		}
+
+
         // Function to search profiles
         function searchProfiles() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            
-            let baseProfiles = showingShortlisted 
-                ? profilesData.filter(p => getShortlist().includes(p.id))
-                : profilesData;
-            
-            currentProfiles = baseProfiles.filter(profile => 
-                profile.name.toLowerCase().includes(searchTerm) || 
-                profile.location.toLowerCase().includes(searchTerm) || 
-				profile.id.toLowerCase().includes(searchTerm)
-            );
-            
-            renderProfiles(currentProfiles);
-        }
+			rebuildProfilesView();
+		}
+
         
         // Function to sort profiles
         function sortProfiles(sortBy) {
@@ -15128,7 +15335,8 @@
             }
             
             currentProfiles = sorted;
-            renderProfiles(currentProfiles);
+			currentPage = 1;
+			renderProfiles(currentProfiles);
         }
         
         // Function to view photo album
@@ -15143,8 +15351,11 @@
         
         // Initialize when page loads
         window.onload = function() {
-            currentProfiles = [...profilesData];
-            renderProfiles(currentProfiles);
+			currentProfiles = sortByDOB(profilesData);
+
+			restoreStateFromURL();
+			renderProfiles(currentProfiles);
+
             updateShortlistCount();
             
             // Show storage status notification (helpful for debugging)
@@ -15153,6 +15364,7 @@
                 // Optional: Show a brief notification to user
                 showStorageNotification();
             }
+			rebuildProfilesView();
         };
         
         // Show notification if localStorage is not working
