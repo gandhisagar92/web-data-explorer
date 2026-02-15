@@ -427,10 +427,10 @@
                 <button class="sort-button" onclick="sortProfiles('height')">Height</button>
             </div>
         </div>
-		<div id="paginationContainer" style="margin-top:40px; text-align:center;"></div>
+		<div id="paginationTop" style="margin-top:40px; text-align:center;"></div>
         <div id="resultsInfo" style="margin:10px 0;font-weight:600;"></div>
         <div class="profiles-grid" id="profilesGrid"></div>
-		<!--<div id="paginationContainer" style="margin-top:40px; text-align:center;"></div>-->
+		<div id="paginationBottom" style="margin-top:40px; text-align:center;"></div>
 
     </div>
     
@@ -14883,7 +14883,6 @@
     "contact": "https://www.saptpadi.in/web-services/contact_detail?toid=SPTPD105"
   }
 ];
-
 		function updateURLState() {
 			const params = new URLSearchParams();
 
@@ -15076,11 +15075,13 @@
         // Function to render profiles
         function renderProfiles(profiles) {
 			const grid = document.getElementById('profilesGrid');
-			const paginationContainer = document.getElementById('paginationContainer');
+			const paginationTop = document.getElementById('paginationTop');
+			const paginationBottom = document.getElementById('paginationBottom');
 
 			if (profiles.length === 0) {
 				grid.innerHTML = '<div class="no-results">No profiles found matching your criteria.</div>';
-				paginationContainer.innerHTML = '';
+				paginationTop.innerHTML = '';
+				paginationBottom.innerHTML = '';
 				return;
 			}
 
@@ -15204,10 +15205,12 @@
 		}
 
 		function renderPagination(totalPages) {
-			const container = document.getElementById('paginationContainer');
+			const topContainer = document.getElementById('paginationTop');
+			const bottomContainer = document.getElementById('paginationBottom');
 
 			if (totalPages <= 1) {
-				container.innerHTML = '';
+				topContainer.innerHTML = '';
+				bottomContainer.innerHTML = '';
 				return;
 			}
 
@@ -15262,7 +15265,10 @@
 			}
 
 			html += `</div>`;
-			container.innerHTML = html;
+			
+			// Render to both containers
+			topContainer.innerHTML = html;
+			bottomContainer.innerHTML = html;
 		}
 
 
